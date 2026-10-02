@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="theme-color" content="#0b1220">
+<title>MLB Pitching vs Batting</title>
+<style>
+:root{--bg:#0b1220;--panel:#111a2e;--panel2:#16213a;--line:#24324f;--text:#e8eefc;--muted:#8fa0c2;--accent:#4f8cff;--accent2:#8b5cf6;
+  --win:#16a34a;--loss:#b91c1c;--empty:#2a3550;--gGreen:#22c55e;--gAmber:#e0a526;--gRed:#ef4444;--gDark:#8f1d1d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:-apple-system,Segoe UI,system-ui,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:560px;margin:0 auto;padding:0 8px calc(16px + env(safe-area-inset-bottom))}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(11,18,32,.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);padding:calc(6px + env(safe-area-inset-top)) 8px 6px;margin:0 -8px 8px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+h1{margin:0;font-size:17px}
+.sub{color:var(--muted);font-size:11px}
+.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12px}
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.toggle{display:flex;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.toggle button{flex:1 1 50%;min-width:0;border:0;background:transparent;color:var(--muted);padding:8px 2px;border-radius:8px;font-weight:700;font-size:12px;white-space:nowrap}
+.toggle button.on{background:var(--accent);color:#fff}
+#modeToggle button.on{background:var(--accent2)}
+.foot{color:var(--muted);font-size:10px;margin-top:6px;line-height:1.4}
+details.foot summary{cursor:pointer}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:8px;margin-bottom:10px}
+.empty{color:var(--muted);font-size:13px;padding:10px}
+.mh{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin:0 2px 6px}
+.mh .t{font-weight:800;font-size:15px;white-space:nowrap}
+.mh .d{font-weight:700;font-size:12px;white-space:nowrap}
+.mh .d.live{color:#ff9a9a}
+.sides{display:grid;grid-template-columns:1fr 1fr;position:relative}
+.sides:before{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--line)}
+.side{padding:0 6px;min-width:0}
+.side:first-child{padding-left:0}.side:last-child{padding-right:0}
+.lbl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.side.h .lbl{text-align:right}
+.side.pitching .lbl{color:var(--accent)}
+select{width:125%;font:inherit;font-size:16px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 18px 6px 4px;
+  -webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 11px) 52%,calc(100% - 7px) 52%;background-size:4px 4px;background-repeat:no-repeat;transform:scale(.8);transform-origin:left center}
+.side.h select{transform-origin:right center;margin-left:-25%}
+.tag{font-size:9px;color:var(--muted);margin:-2px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side.h .tag{text-align:right}
+.ovr{color:#ffd166}
+.kp{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:2px 0 5px}
+.kp div{background:var(--panel2);border:1px solid var(--line);border-radius:7px;text-align:center;padding:3px 2px}
+.kp small{display:block;font-size:9px;color:var(--muted)}
+.kp b{font-size:13px}
+.res{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+.chip{border-radius:6px;font-size:10px;font-weight:700;text-align:center;padding:4px 0;white-space:nowrap}
+.chip.w{background:var(--win);color:#fff}.chip.l{background:var(--loss);color:#fff}
+.chip.e{background:var(--empty);height:20px}
+.ch{display:grid;grid-template-columns:1fr 1fr;font-size:10px;color:var(--muted);margin:8px 0 2px;padding-top:6px;border-top:1px dashed var(--line)}
+.ch div:last-child{text-align:right}
+.ch b{color:var(--text);font-size:11px}
+.sr{display:grid;grid-template-columns:44px 1fr 54px 1fr 44px;align-items:center;gap:6px;padding:5px 0}
+.sr .v{font-weight:800;font-size:14px}
+.sr .v.r{text-align:right}
+.sr .k{text-align:center;white-space:nowrap;font-size:10px;font-weight:700;color:var(--muted)}
+.bar{height:9px;background:#0a1222;border-radius:999px;position:relative;overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;border-radius:999px}
+.bar.l i{left:0}.bar.r i{right:0}
+@media(min-width:700px){.wrap{max-width:760px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <header><div><h1>⚾ MLB Pitching vs Batting</h1><div class="sub">v16 · Expected starters · team-only overrides</div></div><button class="btn" id="reset">Reset</button></header>
+    <div class="tg">
+      <div class="toggle" id="viewToggle"><button data-v="home" class="on">Home Pitch</button><button data-v="away">Away Pitch</button></div>
+      <div class="toggle" id="modeToggle"><button data-m="game" class="on">Per game</button><button data-m="innings">Per inning</button></div>
+    </div>
+  </div>
+  <details class="foot" id="dataStatus" style="margin:0 0 6px"><summary>Data status</summary><div id="dataReport"></div></details>
+  <div id="games"></div>
+  <div class="foot">Colours rank each value against the league from that side's point of view.
+    Pitching (vs all pitchers): top 3% green · top 9% amber · top 17% red · rest dark red.
+    Batting &amp; fielding (vs all teams): top 14% green · top 34% amber · top 80% red · rest dark red.
+    Bar length = value ÷ league maximum. Per game: pitching per start (per appearance for relievers), batting per game.
+    Per inning: pitching stats ÷ the pitcher's average innings, batting stats ÷ 9. Result chips: green = that team won.</div>
+</div>
+
+<!-- =====================================================================
+     PASTE YOUR 4 TABLES BELOW – straight from Excel (click in table,
+     Ctrl+A twice to include the header row → Ctrl+C → paste over the
+     PASTE line). Header rows are strongly recommended.
+     ===================================================================== -->
+<script type="text/plain" id="tsv-fixtures">
+PASTE FIXTURES HERE
+</script>
+<script type="text/plain" id="tsv-pitchers">
+PASTE PITCHERSTATS HERE
+</script>
+<script type="text/plain" id="tsv-batting">
+PASTE BATTINGSTATS HERE
+</script>
+<script type="text/plain" id="tsv-fielding">
+PASTE FIELDINGSTATS HERE
+</script>
+
+<script>
+/* ---------- TSV loader ---------- */
+var fixtures, pitcherStats, battingStats, fieldingStats, DATA_REPORT = [];
+(function(){
+  const TEAM_IDS = new Set([108,109,110,111,112,113,114,115,116,117,118,119,120,121,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,158]);
+  const raw = id => (document.getElementById(id)?.textContent || "");
+  const norm = s => String(s).trim().toLowerCase().replace(/^stat\./, "").replace(/[^a-z0-9]/g, "");
+  const num = v => { if (v == null) return null; const s = String(v).trim().replace(/,/g, "").replace(/%$/, "");
+    if (s === "" || /^[.\-]+$/.test(s)) return null; const n = Number(s); return isNaN(n) ? null : n; };
+  const ipdec = v => { const s = String(v ?? "").trim(); if (!s) return 0; const [w, o] = s.split("."); return (+w || 0) + (+(o || 0)) / 3; };
+  function parseTSV(text) {
+    const lines = text.replace(/\r/g, "").split("\n").filter(l => l.trim() !== "" && !/^PASTE .* HERE$/i.test(l.trim()));
+    if (!lines.length) return [];
+    const d = lines[0].includes("\t") ? "\t" : ",";
+    return lines.map(l => l.split(d));
+  }
+  function hasHeader(row, spec) {
+    const H = new Set(row.map(norm)), all = Object.values(spec).flat().map(norm);
+    return all.filter(a => H.has(a)).length >= 3;
+  }
+  function detectTeamCol(body, exclude) {
+    const n = body[0]?.length || 0; let best = -1, bestScore = 0;
+    for (let c = 0; c < n; c++) {
+      if (exclude.includes(c)) continue;
+      const vals = body.map(r => num(r[c])).filter(v => v != null);
+      if (vals.length < body.length * 0.9) continue;
+      const ok = vals.filter(v => TEAM_IDS.has(v)).length / vals.length;
+      if (ok > bestScore) { bestScore = ok; best = c; }
+    }
+    return bestScore >= 0.95 ? best : -1;
+  }
+  function build(name, rows, spec, positional, optional, required) {
+    if (!rows.length) { DATA_REPORT.push(`${name}: no data pasted`); return []; }
+    let idx = {}, body, header = null;
+    if (hasHeader(rows[0], spec)) {
+      header = rows[0].map(norm); body = rows.slice(1);
+      for (const [k, a] of Object.entries(spec)) { idx[k] = -1; for (const al of a) { const i = header.indexOf(norm(al)); if (i >= 0) { idx[k] = i; break; } } }
+    } else if (positional) { idx = { ...positional }; body = rows; DATA_REPORT.push(`${name}: no header row – using column positions`); }
+    else { DATA_REPORT.push(`${name}: header row required`); return []; }
+    if (idx.teamId === -1 && body.length) {
+      const c = detectTeamCol(body, Object.values(idx).filter(i => i >= 0));
+      if (c >= 0) { idx.teamId = c; DATA_REPORT.push(`${name}: team ID found automatically in column "${rows[0][c]}" (#${c + 1})`); }
+    }
+    const missing = Object.keys(spec).filter(k => idx[k] === -1 && !(optional && optional.test(k)));
+    if (missing.length) DATA_REPORT.push(`${name}: column(s) not found → ${missing.join(", ")}${header ? ` · headers seen: ${rows[0].slice(0, 30).join(", ")}${rows[0].length > 30 ? "…" : ""}` : ""}`);
+    if ((required || []).some(k => idx[k] === -1)) return [];
+    return body.map(r => { const o = {}; for (const k in idx) o[k] = idx[k] >= 0 ? (r[idx[k]] ?? "").trim() : ""; return o; });
+  }
+
+  const fxSpec = { gamePk:["gamePk"], date:["date","officialDate"], gameDate:["gameDate"], status:["detailedState","status"],
+    awayId:["AwayID","AwayTeamID"], away:["AwayTeam"], homeId:["HomeID","HomeTeamID"], home:["HomeTeam"],
+    seriesGame:["seriesGameNumber"], homeStarterId:["HomeStarterID"], awayStarterId:["AwayStarterID"] };
+  ["", "1", "2", "3", "4", "5"].forEach(n => { fxSpec["l"+n+"h"] = ["Last"+n+"HomeScore"]; fxSpec["l"+n+"a"] = ["Last"+n+"AwayScore"]; fxSpec["l"+n+"w"] = ["Last"+n+"Winner"]; });
+  fixtures = build("Fixtures", parseTSV(raw("tsv-fixtures")), fxSpec, null, /^(l\d?[haw]|date|status|seriesGame|homeStarterId|awayStarterId)$/, ["gamePk","awayId","homeId"])
+    .filter(r => num(r.gamePk)).map(r => {
+      const last = [];
+      ["", "1", "2", "3", "4", "5"].forEach(n => { const h = num(r["l"+n+"h"]), a = num(r["l"+n+"a"]); if (h != null && a != null) last.push({ home: h, away: a, winner: r["l"+n+"w"] }); });
+      return { gamePk: num(r.gamePk), date: r.date || String(r.gameDate).slice(0, 10), gameDate: r.gameDate || r.date, status: r.status,
+        awayId: num(r.awayId), away: r.away, homeId: num(r.homeId), home: r.home, seriesGame: num(r.seriesGame),
+        homeStarterId: num(r.homeStarterId), awayStarterId: num(r.awayStarterId), last };
+    });
+
+  pitcherStats = build("PitcherStats", parseTSV(raw("tsv-pitchers")), {
+    teamId:["TeamID","team.id","teamId","team_id","id","id.1","team id"], id:["PlayerID","person.id","personId","playerId"], name:["PlayerName","fullName","person.fullName","Name"],
+    g:["gamesPlayed","gamesPitched","G"], gs:["gamesStarted","GS"], so:["strikeOuts","SO"], bb:["baseOnBalls","BB"], h:["hits","H"],
+    era:["era"], ip:["inningsPitched","IP"], w:["wins","W"], l:["losses","L"], er:["earnedRuns","ER"], whip:["whip"]
+  }, { teamId:2, id:21, name:22, g:25, gs:26, so:33, bb:34, h:36, era:49, ip:50, w:51, l:52, er:57, whip:58 }, /^(era|whip)$/, ["teamId","id","name"])
+  .filter(r => num(r.id) && num(r.teamId)).map(r => ({ id: num(r.id), name: r.name, teamId: num(r.teamId), g: num(r.g) || 0, gs: num(r.gs) || 0,
+    so: num(r.so) || 0, bb: num(r.bb) || 0, h: num(r.h) || 0, era: num(r.era), ip: ipdec(r.ip), ipText: r.ip, w: num(r.w) || 0, l: num(r.l) || 0, er: num(r.er) || 0, whip: num(r.whip) }));
+
+  battingStats = build("BattingStats", parseTSV(raw("tsv-batting")), {
+    teamId:["TeamID","team.id","teamId","id"], g:["gamesPlayed","G"], r:["runs","R"], h:["hits","H"], bb:["baseOnBalls","BB"], so:["strikeOuts","SO"], obp:["obp"]
+  }, { teamId:1, g:4, r:7, h:8, bb:14, so:16, obp:26 }, null, ["teamId"])
+  .filter(r => num(r.teamId)).map(r => ({ teamId: num(r.teamId), g: num(r.g) || 1, r: num(r.r) || 0, h: num(r.h) || 0, bb: num(r.bb) || 0, so: num(r.so) || 0, obp: num(r.obp) }));
+
+  fieldingStats = build("FieldingStats", parseTSV(raw("tsv-fielding")), {
+    teamId:["TeamID","team.id","teamId","id"], fe:["fielding","fieldingPercentage","FE","FPCT"], g:["gamesPlayed","G"]
+  }, { teamId:1, fe:11, g:4 }, /^g$/, ["teamId"])
+  .filter(r => num(r.teamId)).map(r => ({ teamId: num(r.teamId), fe: num(r.fe) }));
+
+  DATA_REPORT.unshift(`Loaded: ${fixtures.length} fixtures · ${pitcherStats.length} pitchers · ${battingStats.length} batting · ${fieldingStats.length} fielding`);
+  if (!fixtures.length || !pitcherStats.length || !battingStats.length || !fieldingStats.length) fixtures = null;
+})();
+</script>
+
+<script>
+(function(){
+document.getElementById("dataReport").innerHTML = DATA_REPORT.map(s => "<div>" + s.replace(/[<>&]/g, "") + "</div>").join("");
+const gamesEl = document.getElementById("games");
+if (!fixtures) { gamesEl.innerHTML = '<div class="card empty">No data loaded. Paste your four Excel tables between the <b>tsv-…</b> tags in index.html. See <b>Data status</b> above.</div>'; document.getElementById("dataStatus").open = true; return; }
+
+const S = { view: "home", mode: "game", ovr: {} };
+const P = new Map(pitcherStats.map(p => [p.id, p])), BAT = new Map(battingStats.map(b => [b.teamId, b])), FLD = new Map(fieldingStats.map(f => [f.teamId, f]));
+const den = p => (p.gs > 0 ? p.gs : p.g) || 1, avgIP = p => p.ip / den(p), wp = p => (p.w + p.l) ? p.w / (p.w + p.l) : null;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const f2 = v => v == null || isNaN(v) ? "–" : v.toFixed(2), f3 = v => v == null || isNaN(v) ? "–" : v.toFixed(3).replace(/^0/, "");
+const pct = v => v == null ? "–" : (v * 100).toFixed(1) + "%";
+const ipf = v => { if (v == null || isNaN(v)) return "–"; const w = Math.floor(v), o = Math.round((v - w) * 3); return o === 3 ? (w + 1) + ".0" : w + "." + o; };
+const AB = {108:"LAA",109:"ARI",110:"BAL",111:"BOS",112:"CHC",113:"CIN",114:"CLE",115:"COL",116:"DET",117:"HOU",118:"KC",119:"LAD",120:"WSH",121:"NYM",133:"ATH",134:"PIT",135:"SD",136:"SEA",137:"SF",138:"STL",139:"TB",140:"TEX",141:"TOR",142:"MIN",143:"PHI",144:"ATL",145:"CWS",146:"MIA",147:"NYY",158:"MIL"};
+const ab = id => AB[id] || String(id);
+
+/* Per game: pitcher per start (per appearance for relievers), batting per game.
+   Per inning: pitcher per-start stat ÷ avg innings, batting per-game stat ÷ 9. */
+const pStat = (p, k) => { const v = p[k] / den(p); if (S.mode !== "innings") return v; const a = avgIP(p); return a > 0 ? v / a : null; };
+const bStat = (b, k) => { const v = b[k] / b.g; return S.mode === "innings" ? v / 9 : v; };
+
+/* League pools: ALL pitchers (only those who have pitched); all teams for batting/fielding */
+const pool = pitcherStats.filter(p => p.ip > 0);
+const nn = a => a.filter(x => x != null && !isNaN(x));
+function dist() {
+  return {
+    so: nn(pool.map(p => pStat(p, "so"))), bb: nn(pool.map(p => pStat(p, "bb"))), er: nn(pool.map(p => pStat(p, "er"))), h: nn(pool.map(p => pStat(p, "h"))),
+    fe: nn(fieldingStats.map(f => f.fe)),
+    bso: battingStats.map(b => bStat(b, "so")), bbb: battingStats.map(b => bStat(b, "bb")), br: battingStats.map(b => bStat(b, "r")), bh: battingStats.map(b => bStat(b, "h")),
+    obp: nn(battingStats.map(b => b.obp))
+  };
+}
+let D = dist();
+const MAX = arr => arr.length ? Math.max(...arr) : 1;
+
+/* Share of the league that is strictly better than this value (0 = best) */
+function topShare(arr, v, higherBetter) { if (v == null || !arr.length) return null; return arr.filter(x => higherBetter ? x > v : x < v).length / arr.length; }
+const BANDS = {
+  pitch: [0.03, 0.09, 0.17],   /* vs ~900 pitchers */
+  team:  [0.14, 0.34, 0.80]    /* vs 30 teams (batting & fielding) */
+};
+function colour(s, kind) {
+  if (s == null) return "#55627d";
+  const [g, a, r] = BANDS[kind];
+  if (s < g) return "var(--gGreen)";
+  if (s < a) return "var(--gAmber)";
+  if (s < r) return "var(--gRed)";
+  return "var(--gDark)";
+}
+
+const teamP = t => pitcherStats.filter(p => p.teamId === t);
+function expected(fx, side) {
+  const id = side === "home" ? fx.homeStarterId : fx.awayStarterId, t = side === "home" ? fx.homeId : fx.awayId;
+  if (id && P.has(id) && P.get(id).teamId === t) return { id, ann: true };
+  const fb = teamP(t).slice().sort((a, b) => b.gs - a.gs)[0]; return { id: fb ? fb.id : null, ann: false };
+}
+function sel(fx, side) { const o = S.ovr[fx.gamePk]; if (o && o[side]) return { id: o[side], ovr: true }; const e = expected(fx, side); return { id: e.id, ovr: false, ann: e.ann }; }
+const when = (fx, o) => { const t = new Date(fx.gameDate); return isNaN(t) ? fx.date : t.toLocaleString("en-GB", o); };
+
+function chips(fx, side) {
+  const team = side === "home" ? fx.home : fx.away, out = [];
+  for (let i = 0; i < 6; i++) { const g = (fx.last || [])[i];
+    if (!g) { out.push('<div class="chip e"></div>'); continue; }
+    const mine = side === "home" ? g.home : g.away, theirs = side === "home" ? g.away : g.home;
+    out.push(`<div class="chip ${g.winner === team ? "w" : "l"}">${mine}-${theirs}</div>`); }
+  if (side === "home") out.reverse();
+  return `<div class="res">${out.join("")}</div>`;
+}
+function sideBlock(fx, side) {
+  const t = side === "home" ? fx.homeId : fx.awayId, e = expected(fx, side), s = sel(fx, side), p = P.get(s.id), L = teamP(t);
+  const st = L.filter(x => x.gs > 0).sort((a, b) => b.gs - a.gs || a.name.localeCompare(b.name));
+  const rp = L.filter(x => x.gs === 0).sort((a, b) => b.g - a.g || a.name.localeCompare(b.name));
+  const o = x => `<option value="${x.id}" ${x.id === s.id ? "selected" : ""}>${x.id === e.id ? "★ " : ""}${esc(x.name)} (${x.gs} GS)</option>`;
+  const tag = s.ovr ? '<span class="ovr">Override</span>' : e.ann ? "Expected starter" : "TBC · most starts";
+  return `<div class="side ${side === "home" ? "h" : "a"} ${S.view === side ? "pitching" : ""}">
+    <div class="lbl">${side === "home" ? ab(t) + " – Home" : "Away – " + ab(t)}</div>
+    ${L.length ? `<select data-pk="${fx.gamePk}" data-side="${side}" aria-label="${side} pitcher"><optgroup label="Starters">${st.map(o).join("")}</optgroup>${rp.length ? `<optgroup label="Relievers">${rp.map(o).join("")}</optgroup>` : ""}</select>` : '<div class="tag">No pitchers for this team</div>'}
+    <div class="tag">${tag}${p ? ` · ${p.w}-${p.l} · ERA ${f2(p.era)}` : ""}</div>
+    <div class="kp"><div><small>Avg innings</small><b>${p ? ipf(avgIP(p)) : "–"}</b></div><div><small>Win %</small><b>${p ? pct(wp(p)) : "–"}</b></div></div>
+    ${chips(fx, side)}</div>`;
+}
+function stats(fx) {
+  const ps = S.view, bs = ps === "home" ? "away" : "home", inn = S.mode === "innings";
+  const p = P.get(sel(fx, ps).id), bat = BAT.get(bs === "home" ? fx.homeId : fx.awayId), fld = FLD.get(ps === "home" ? fx.homeId : fx.awayId);
+  if (!p || !bat) return '<div class="empty">Missing pitcher or batting data.</div>';
+  /* pk = colour band used for the pitching-side value (FE is a team stat → team bands) */
+  const rows = [
+    { k: "SO", pv: pStat(p, "so"), pd: D.so, pHi: true,  pk: "pitch", bv: bStat(bat, "so"), bd: D.bso, bHi: false },
+    { k: "BB", pv: pStat(p, "bb"), pd: D.bb, pHi: false, pk: "pitch", bv: bStat(bat, "bb"), bd: D.bbb, bHi: true },
+    { k: "ER / R", pv: pStat(p, "er"), pd: D.er, pHi: false, pk: "pitch", bv: bStat(bat, "r"), bd: D.br, bHi: true },
+    { k: "H", pv: pStat(p, "h"), pd: D.h, pHi: false, pk: "pitch", bv: bStat(bat, "h"), bd: D.bh, bHi: true },
+    { k: "FE / OBP", pv: fld ? fld.fe : null, pd: D.fe, pHi: true, pk: "team", bv: bat.obp, bd: D.obp, bHi: true, rate: true }
+  ];
+  const awayP = ps === "away";
+  const pitchHead = `<b>${esc(p.name)}</b><br>${ab(ps === "home" ? fx.homeId : fx.awayId)} pitching · ${inn ? "per inning" : `per ${p.gs > 0 ? "start" : "app."}`}`;
+  const batHead = `<b>${ab(bs === "home" ? fx.homeId : fx.awayId)} batting</b><br>${inn ? "per inning" : "per game"}`;
+  const head = `<div class="ch"><div>${awayP ? pitchHead : batHead}</div><div>${awayP ? batHead : pitchHead}</div></div>`;
+  return head + rows.map(r => {
+    const fv = v => r.rate ? f3(v) : f2(v);
+    const A = { v: fv(r.pv), raw: r.pv, c: colour(topShare(r.pd, r.pv, r.pHi), r.pk), max: MAX(r.pd) };
+    const B = { v: fv(r.bv), raw: r.bv, c: colour(topShare(r.bd, r.bv, r.bHi), "team"), max: MAX(r.bd) };
+    const L_ = awayP ? A : B, R_ = awayP ? B : A, w = x => x.raw == null ? 0 : Math.max(3, Math.min(100, x.raw / x.max * 100));
+    return `<div class="sr"><span class="v" style="color:${L_.c}">${L_.v}</span>
+      <div class="bar l"><i style="width:${w(L_)}%;background:${L_.c}"></i></div>
+      <span class="k">${r.k}</span>
+      <div class="bar r"><i style="width:${w(R_)}%;background:${R_.c}"></i></div>
+      <span class="v r" style="color:${R_.c}">${R_.v}</span></div>`;
+  }).join("");
+}
+const ordered = fixtures.slice().sort((a, b) => String(a.gameDate).localeCompare(String(b.gameDate)) || a.gamePk - b.gamePk);
+function card(fx) {
+  const live = /progress|warmup/i.test(fx.status || "");
+  return `<div class="card" id="g${fx.gamePk}">
+    <div class="mh"><span class="t">${ab(fx.awayId)} @ ${ab(fx.homeId)} – Game ${fx.seriesGame ?? "–"}</span>
+      <span class="d ${live ? "live" : ""}">${esc(when(fx, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }))}</span></div>
+    <div class="sides">${sideBlock(fx, "away")}${sideBlock(fx, "home")}</div>
+    ${stats(fx)}</div>`;
+}
+function renderAll() { gamesEl.innerHTML = ordered.map(card).join(""); }
+function rerender(pk) { const fx = ordered.find(f => f.gamePk === pk), el = document.getElementById("g" + pk); if (fx && el) el.outerHTML = card(fx); }
+gamesEl.addEventListener("change", e => {
+  const s = e.target.closest("select[data-pk]"); if (!s) return;
+  const pk = +s.dataset.pk, side = s.dataset.side, id = +s.value, fx = ordered.find(f => f.gamePk === pk), o = S.ovr[pk] || (S.ovr[pk] = {});
+  if (id === expected(fx, side).id) delete o[side]; else o[side] = id;
+  rerender(pk);
+});
+function bindToggle(id, key, attr) {
+  const box = document.getElementById(id);
+  box.querySelectorAll("button").forEach(b => b.onclick = () => {
+    S[key] = b.dataset[attr]; box.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+    if (key === "mode") D = dist();
+    const y = window.scrollY; renderAll(); window.scrollTo(0, y);
+  });
+}
+bindToggle("viewToggle", "view", "v"); bindToggle("modeToggle", "mode", "m");
+document.getElementById("reset").onclick = () => { S.ovr = {}; const y = window.scrollY; renderAll(); window.scrollTo(0, y); };
+renderAll();
+})();
+</script>
+</body>
+</html>
